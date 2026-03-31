@@ -28,9 +28,12 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 
+import pathlib
+import os
+
 # ── Helper: absolute path to index.html ───────────────────────────────────────
-BASE_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FORM_URL  = f"file:///{BASE_DIR}/index.html".replace("\\", "/")
+BASE_DIR = pathlib.Path(__file__).parent.parent.resolve()
+FORM_URL = BASE_DIR.joinpath("index.html").as_uri()
 
 WAIT_SEC  = 8   # max seconds for explicit waits
 
@@ -98,7 +101,7 @@ def fill_valid_form(driver):
     select.select_by_value("CSE")
 
     # Gender radio
-    driver.find_element(By.ID, "genderMale").click()
+    click_element(driver, driver.find_element(By.ID, "genderMale"))
 
     # Comments (10+ words)
     comments = driver.find_element(By.ID, "feedbackComments")
@@ -200,7 +203,7 @@ def test_tc4_invalid_email_shows_error(driver):
     driver.find_element(By.ID, "emailId").send_keys("invalidemail@")   # malformed
     driver.find_element(By.ID, "mobileNumber").send_keys("9876543210")
     Select(driver.find_element(By.ID, "department")).select_by_value("IT")
-    driver.find_element(By.ID, "genderFemale").click()
+    click_element(driver, driver.find_element(By.ID, "genderFemale"))
     comments = driver.find_element(By.ID, "feedbackComments")
     scroll_into_view(driver, comments)
     comments.send_keys(
@@ -235,7 +238,7 @@ def test_tc5_invalid_mobile_shows_error(driver):
     driver.find_element(By.ID, "emailId").send_keys("test@example.com")
     driver.find_element(By.ID, "mobileNumber").send_keys("98ABC43210")  # invalid
     Select(driver.find_element(By.ID, "department")).select_by_value("ECE")
-    driver.find_element(By.ID, "genderOther").click()
+    click_element(driver, driver.find_element(By.ID, "genderOther"))
     comments5 = driver.find_element(By.ID, "feedbackComments")
     scroll_into_view(driver, comments5)
     comments5.send_keys(
