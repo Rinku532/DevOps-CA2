@@ -1,0 +1,360 @@
+/* ============================================================
+   EXTERNAL CSS — Student Feedback Registration Form
+   Visual design: glassmorphism card on animated gradient bg
+   ============================================================ */
+
+/* ---------- 1. CSS Custom Properties (Design Tokens) ---------- */
+:root {
+  --c-bg-from:    #0f0c29;
+  --c-bg-mid:     #302b63;
+  --c-bg-to:      #24243e;
+
+  --c-card-bg:    rgba(255, 255, 255, 0.07);
+  --c-card-border:rgba(255, 255, 255, 0.14);
+
+  --c-accent:     #7c6ff7;
+  --c-accent-2:   #a78bfa;
+  --c-accent-glow:rgba(124, 111, 247, 0.45);
+
+  --c-text:       #e8e4ff;
+  --c-text-muted: rgba(232, 228, 255, 0.55);
+
+  --c-input-bg:   rgba(255, 255, 255, 0.06);
+  --c-input-border:rgba(255, 255, 255, 0.18);
+  --c-input-focus: #7c6ff7;
+
+  --c-error:      #f87171;
+  --c-success:    #34d399;
+
+  --radius-card:  20px;
+  --radius-input: 10px;
+  --shadow-card:  0 25px 60px rgba(0,0,0,0.55);
+  --transition:   0.22s ease;
+}
+
+/* ---------- 2. Animated Background ---------- */
+body {
+  background: linear-gradient(135deg, var(--c-bg-from), var(--c-bg-mid), var(--c-bg-to));
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
+  color: var(--c-text);
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
+/* ---------- 3. Glass Card ---------- */
+.card {
+  width: 100%;
+  max-width: 760px;
+  background: var(--c-card-bg);
+  border: 1px solid var(--c-card-border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: var(--shadow-card);
+  padding: 2.6rem 2.8rem;
+  animation: fadeSlideUp 0.55s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ---------- 4. Card Header ---------- */
+.card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logo-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 24px var(--c-accent-glow);
+  color: #fff;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 24px var(--c-accent-glow); }
+  50%       { box-shadow: 0 0 42px var(--c-accent-glow); }
+}
+
+h1 { color: var(--c-text); }
+
+.subtitle { color: var(--c-text-muted); }
+
+/* ---------- 5. Form Layout ---------- */
+.form-row { display: flex; gap: 1.2rem; }
+.two-col > .form-group { flex: 1; }
+
+.form-group {
+  margin-bottom: 1.4rem;
+  position: relative;
+}
+
+label {
+  color: var(--c-text-muted);
+  transition: color var(--transition);
+}
+.form-group:focus-within > label {
+  color: var(--c-accent-2);
+}
+
+/* ---------- 6. Inputs, Select, Textarea ---------- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+  background: var(--c-input-bg);
+  border: 1.5px solid var(--c-input-border);
+  border-radius: var(--radius-input);
+  color: var(--c-text);
+  padding: 0.7rem 1rem;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--c-input-focus);
+  background: rgba(124, 111, 247, 0.08);
+  box-shadow: 0 0 0 3px rgba(124, 111, 247, 0.2);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-text-muted);
+  font-size: 0.88rem;
+}
+
+textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+/* Select arrow */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+select option { background: #302b63; color: var(--c-text); }
+
+/* ---------- 7. Invalid / Error States ---------- */
+.form-group.invalid input,
+.form-group.invalid select,
+.form-group.invalid textarea {
+  border-color: var(--c-error);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.18);
+}
+
+.error-msg {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--c-error);
+  margin-top: 0.35rem;
+  min-height: 1em;
+  transition: opacity var(--transition);
+}
+
+/* ---------- 8. Radio Buttons ---------- */
+.radio-group {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.92rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--c-text);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--c-input-border);
+  border-radius: 50px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.radio-label:hover {
+  border-color: var(--c-accent-2);
+  background: rgba(124,111,247,0.07);
+}
+
+.radio-label input[type="radio"] { display: none; }
+
+.radio-custom {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--c-text-muted);
+  position: relative;
+  transition: border-color var(--transition);
+  flex-shrink: 0;
+}
+.radio-custom::after {
+  content: '';
+  width: 8px; height: 8px;
+  background: var(--c-accent);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  transition: transform 0.18s ease;
+}
+
+.radio-label input[type="radio"]:checked ~ .radio-custom { border-color: var(--c-accent); }
+.radio-label input[type="radio"]:checked ~ .radio-custom::after { transform: translate(-50%,-50%) scale(1); }
+.radio-label:has(input:checked) {
+  border-color: var(--c-accent);
+  background: rgba(124,111,247,0.12);
+  color: var(--c-accent-2);
+}
+
+/* ---------- 9. Textarea Meta (word count) ---------- */
+.textarea-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.word-count {
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+  white-space: nowrap;
+  margin-top: 0.35rem;
+  transition: color var(--transition);
+}
+.word-count.enough { color: var(--c-success); }
+
+/* ---------- 10. Buttons ---------- */
+.btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.6rem;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition), opacity var(--transition);
+}
+
+.btn:active { transform: scale(0.96); }
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(124,111,247,0.4);
+}
+.btn-submit:hover {
+  box-shadow: 0 8px 28px rgba(124,111,247,0.6);
+  transform: translateY(-2px);
+}
+
+.btn-reset {
+  background: rgba(255,255,255,0.08);
+  color: var(--c-text);
+  border: 1.5px solid var(--c-input-border);
+}
+.btn-reset:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: var(--c-text-muted);
+  transform: translateY(-2px);
+}
+
+/* ---------- 11. Success Modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.25s ease;
+}
+.modal-overlay[hidden] { display: none; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-box {
+  background: linear-gradient(160deg, #1e1b4b, #2e2050);
+  border: 1px solid var(--c-card-border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+  animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.modal-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.2rem;
+  box-shadow: 0 0 30px rgba(52,211,153,0.4);
+}
+
+.modal-box h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 0.6rem;
+  color: var(--c-text);
+}
+.modal-box p {
+  color: var(--c-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- 12. Responsive ---------- */
+@media (max-width: 600px) {
+  .card { padding: 1.8rem 1.4rem; }
+  .form-row.two-col { flex-direction: column; gap: 0; }
+  .btn-row { justify-content: center; }
+  h1 { font-size: 1.5rem; }
+}
