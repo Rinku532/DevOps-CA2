@@ -1,221 +1,242 @@
-/**
- * validation.js — Student Feedback Registration Form
- * Sub Task 3: JavaScript client-side validation
- *
- * Rules:
- *  - Student Name  : not empty
- *  - Email         : proper format (regex)
- *  - Mobile Number : exactly 10 digits
- *  - Gender        : at least one radio selected
- *  - Department    : must choose a non-placeholder value
- *  - Comments      : not blank, minimum 10 words
- */
-
 'use strict';
 
-/* ── Utility helpers ─────────────────────────────────────── */
+const $ = id => document.getElementById(id);
 
-/**
- * Count words in a string (split by whitespace, ignore empty tokens).
- * @param {string} text
- * @returns {number}
- */
+const setError = (groupId, msgId, msg) => {
+  const group = $(groupId);
+  const span  = $(msgId);
+  if (group) { group.classList.add('has-error'); group.classList.remove('has-success'); }
+  if (span)  span.textContent = msg;
+};
+
+const setSuccess = (groupId, msgId) => {
+  const group = $(groupId);
+  const span  = $(msgId);
+  if (group) { group.classList.remove('has-error'); group.classList.add('has-success'); }
+  if (span)  span.textContent = '';
+};
+
+const clearState = (groupId, msgId) => {
+  const group = $(groupId);
+  const span  = $(msgId);
+  if (group) group.classList.remove('has-error', 'has-success');
+  if (span)  span.textContent = '';
+};
+
+const RULES = {
+  studentName(v) {
+    const t = v.trim();
+    if (!t)                            return 'Student name is required.';
+    if (t.length < 2)                  return 'Name must be at least 2 characters.';
+    if (t.length > 100)                return 'Name must not exceed 100 characters.';
+    if (!/^[A-Za-z\s'.'-]+$/.test(t)) return 'Name may only contain letters and spaces.';
+    return null;
+  },
+  emailId(v) {
+    const t = v.trim();
+    if (!t)          return 'Email ID is required.';
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!re.test(t)) return 'Enter a valid email address (e.g. student@college.edu).';
+    return null;
+  },
+  mobileNumber(v) {
+    const t = v.trim();
+    if (!t) return 'Mobile number is required.';
+    const digits = t.replace(/[\s\-().+]/g, '');
+    if (!/^\d+$/.test(digits)) return 'Mobile number must contain valid digits only.';
+    if (digits.length < 7)     return 'Mobile number must have at least 7 digits.';
+    if (digits.length > 15)    return 'Mobile number must not exceed 15 digits.';
+    return null;
+  },
+  department(v) {
+    return v ? null : 'Please select your department.';
+  },
+  gender() {
+    const checked = document.querySelector('input[name="gender"]:checked');
+    return checked ? null : 'Please select your gender.';
+  },
+  feedbackComments(v) {
+    const t = v.trim();
+    if (!t) return 'Feedback comments are required.';
+    const wordCount = countWords(t);
+    if (wordCount < 10) return `Comments must be at least 10 words (currently ${wordCount} word${wordCount === 1 ? '' : 's'}).`;
+    return null;
+  },
+};
+
 function countWords(text) {
-  return text.trim().split(/\s+/).filter(Boolean).length;
+  return text.trim().split(/\s+/).filter(w => w.length > 0).length;
 }
 
-/**
- * Mark a form-group as valid or invalid and set/clear an error message.
- * @param {string} groupId  - id of the .form-group element
- * @param {string} errorId  - id of the .error-msg <span>
- * @param {boolean} isValid
- * @param {string} message  - error message (empty string clears it)
- */
-function setValidity(groupId, errorId, isValid, message = '') {
-  const group = document.getElementById(groupId);
-  const span  = document.getElementById(errorId);
-
-  if (!group || !span) return;
-
-  if (isValid) {
-    group.classList.remove('invalid');
-    span.textContent = '';
+function updateWordCount(text) {
+  const count  = countWords(text.trim());
+  const el     = $('feedback-wordcount');
+  if (!el) return;
+  const needed = Math.max(0, 10 - count);
+  if (count >= 10) {
+    el.textContent = `✔ ${count} words — minimum met`;
+    el.className   = 'ok';
+  } else if (count === 0) {
+    el.textContent = `0 / 10 words minimum`;
+    el.className   = 'bad';
   } else {
-    group.classList.add('invalid');
-    span.textContent = message;
+    el.textContent = `${count} / 10 — ${needed} more word${needed === 1 ? '' : 's'} needed`;
+    el.className   = 'bad';
   }
 }
 
-/* ── Individual field validators ─────────────────────────── */
-
-function validateName() {
-  const val = document.getElementById('studentName').value.trim();
-  const ok  = val.length > 0;
-  setValidity('group-name', 'err-name', ok, 'Student name is required.');
-  return ok;
+function validateName(live) {
+  const val = $('studentName').value;
+  const err = RULES.studentName(val);
+  if (live && !val.trim()) { clearState('group-name', 'name-error'); return true; }
+  if (err) { setError('group-name', 'name-error', err); return false; }
+  setSuccess('group-name', 'name-error'); return true;
 }
 
-function validateEmail() {
-  const val   = document.getElementById('emailId').value.trim();
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  let msg = '';
-
-  if (!val) {
-    msg = 'Email address is required.';
-  } else if (!regex.test(val)) {
-    msg = 'Enter a valid email address (e.g. name@example.com).';
-  }
-
-  const ok = msg === '';
-  setValidity('group-email', 'err-email', ok, msg);
-  return ok;
+function validateEmail(live) {
+  const val = $('emailId').value;
+  const err = RULES.emailId(val);
+  if (live && !val.trim()) { clearState('group-email', 'email-error'); return true; }
+  if (err) { setError('group-email', 'email-error', err); return false; }
+  setSuccess('group-email', 'email-error'); return true;
 }
 
-function validateMobile() {
-  const val   = document.getElementById('mobileNumber').value.trim();
-  const regex = /^\d{10}$/;
-  let msg = '';
-
-  if (!val) {
-    msg = 'Mobile number is required.';
-  } else if (!regex.test(val)) {
-    msg = 'Enter a valid 10-digit mobile number (digits only).';
-  }
-
-  const ok = msg === '';
-  setValidity('group-mobile', 'err-mobile', ok, msg);
-  return ok;
+function validateMobile(live) {
+  const val = $('mobileNumber').value;
+  const err = RULES.mobileNumber(val);
+  if (live && !val.trim()) { clearState('group-mobile', 'mobile-error'); return true; }
+  if (err) { setError('group-mobile', 'mobile-error', err); return false; }
+  setSuccess('group-mobile', 'mobile-error'); return true;
 }
 
 function validateDepartment() {
-  const val = document.getElementById('department').value;
-  const ok  = val !== '' && val !== null;
-  setValidity('group-dept', 'err-dept', ok, 'Please select your department.');
-  return ok;
+  const val = $('department').value;
+  const err = RULES.department(val);
+  if (err) { setError('group-department', 'department-error', err); return false; }
+  setSuccess('group-department', 'department-error'); return true;
 }
 
 function validateGender() {
-  const selected = document.querySelector('input[name="gender"]:checked');
-  const ok = selected !== null;
-  setValidity('group-gender', 'err-gender', ok, 'Please select your gender.');
-  return ok;
+  const err = RULES.gender();
+  if (err) { setError('group-gender', 'gender-error', err); return false; }
+  setSuccess('group-gender', 'gender-error'); return true;
 }
 
-function validateComments() {
-  const val   = document.getElementById('feedbackComments').value.trim();
-  const words = countWords(val);
-  let msg = '';
+function validateFeedback(live) {
+  const val = $('feedbackComments').value;
+  const err = RULES.feedbackComments(val);
+  if (live && !val.trim()) { clearState('group-feedback', 'feedback-error'); return true; }
+  if (err) { setError('group-feedback', 'feedback-error', err); return false; }
+  setSuccess('group-feedback', 'feedback-error'); return true;
+}
 
-  if (!val) {
-    msg = 'Feedback comments are required.';
-  } else if (words < 10) {
-    msg = `Please write at least 10 words (currently ${words} word${words === 1 ? '' : 's'}).`;
+function validateAll() {
+  const n = validateName(false);
+  const e = validateEmail(false);
+  const m = validateMobile(false);
+  const d = validateDepartment();
+  const g = validateGender();
+  const f = validateFeedback(false);
+  return n && e && m && d && g && f;
+}
+
+function setupStarRating() {
+  const stars      = document.querySelectorAll('#starRow i');
+  const ratingInput = $('rating');
+  let current = 0;
+
+  function highlight(n) {
+    stars.forEach((s, i) => s.classList.toggle('active', i < n));
   }
 
-  const ok = msg === '';
-  setValidity('group-comments', 'err-comments', ok, msg);
-  return ok;
+  stars.forEach((star, idx) => {
+    star.addEventListener('mouseover', () => highlight(idx + 1));
+    star.addEventListener('mouseleave', () => highlight(current));
+    star.addEventListener('click', () => {
+      current = idx + 1;
+      ratingInput.value = current;
+      highlight(current);
+    });
+    star.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        current = idx + 1;
+        ratingInput.value = current;
+        highlight(current);
+      }
+    });
+  });
 }
 
-/* ── Live word-count for textarea ────────────────────────── */
+function triggerReset() {
+  $('feedbackForm').reset();
 
-(function initWordCount() {
-  const textarea  = document.getElementById('feedbackComments');
-  const wordCount = document.getElementById('word-count');
+  ['group-name','group-email','group-mobile','group-department','group-gender','group-feedback']
+    .forEach(id => {
+      const el = $(id);
+      if (el) el.classList.remove('has-error', 'has-success');
+    });
 
-  if (!textarea || !wordCount) return;
+  ['name-error','email-error','mobile-error','department-error','gender-error','feedback-error']
+    .forEach(id => {
+      const el = $(id);
+      if (el) el.textContent = '';
+    });
 
-  textarea.addEventListener('input', () => {
-    const n = countWords(textarea.value);
-    wordCount.textContent = `${n} word${n === 1 ? '' : 's'}`;
-    wordCount.classList.toggle('enough', n >= 10);
+  updateWordCount('');
+
+  document.querySelectorAll('#starRow i').forEach(s => s.classList.remove('active'));
+  if ($('rating')) $('rating').value = '';
+
+  $('successMsg').classList.add('hidden');
+  $('feedbackForm').classList.remove('hidden');
+}
+window.triggerReset = triggerReset;
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  $('studentName').addEventListener('input',  () => validateName(true));
+  $('studentName').addEventListener('blur',   () => validateName(false));
+
+  $('emailId').addEventListener('input', () => validateEmail(true));
+  $('emailId').addEventListener('blur',  () => validateEmail(false));
+
+  $('mobileNumber').addEventListener('input', () => validateMobile(true));
+  $('mobileNumber').addEventListener('blur',  () => validateMobile(false));
+
+  $('department').addEventListener('change', validateDepartment);
+
+  document.querySelectorAll('input[name="gender"]')
+    .forEach(r => r.addEventListener('change', validateGender));
+
+  $('feedbackComments').addEventListener('input', () => {
+    updateWordCount($('feedbackComments').value);
+    validateFeedback(true);
   });
-})();
+  $('feedbackComments').addEventListener('blur', () => validateFeedback(false));
 
-/* ── Real-time validation (on blur) ─────────────────────── */
+  setupStarRating();
 
-(function attachBlurListeners() {
-  const map = [
-    ['studentName',     validateName],
-    ['emailId',         validateEmail],
-    ['mobileNumber',    validateMobile],
-    ['department',      validateDepartment],
-    ['feedbackComments',validateComments],
-  ];
-
-  map.forEach(([id, fn]) => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('blur', fn);
+  $('resetBtn').addEventListener('click', () => {
+    setTimeout(triggerReset, 0);
   });
 
-  // Gender radios
-  document.querySelectorAll('input[name="gender"]').forEach(radio => {
-    radio.addEventListener('change', validateGender);
-  });
-})();
-
-/* ── Form submission ─────────────────────────────────────── */
-
-document.getElementById('feedbackForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-
-  // Run all validators; collect results
-  const results = [
-    validateName(),
-    validateEmail(),
-    validateMobile(),
-    validateDepartment(),
-    validateGender(),
-    validateComments(),
-  ];
-
-  const allValid = results.every(Boolean);
-
-  if (!allValid) {
-    // Scroll to first error
-    const firstError = document.querySelector('.form-group.invalid');
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('feedbackForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (!validateAll()) {
+      const firstErr = document.querySelector('.form-group.has-error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
-    return;
-  }
+    const btn = $('submitBtn');
+    btn.disabled = true;
+    btn.querySelector('.btn-text').textContent = 'Submitting…';
+    setTimeout(() => {
+      $('feedbackForm').classList.add('hidden');
+      $('successMsg').classList.remove('hidden');
+      $('successMsg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 1000);
+  });
 
-  // ── All validations passed → show success modal
-  document.getElementById('successModal').removeAttribute('hidden');
-  this.reset();
-
-  // Reset word count display
-  const wc = document.getElementById('word-count');
-  if (wc) { wc.textContent = '0 words'; wc.classList.remove('enough'); }
-
-  // Clear any leftover invalid states
-  document.querySelectorAll('.form-group.invalid').forEach(g => g.classList.remove('invalid'));
-});
-
-/* ── Reset button: clear validation states ───────────────── */
-
-document.getElementById('resetBtn').addEventListener('click', function () {
-  // Give the browser time to clear field values first
-  setTimeout(() => {
-    document.querySelectorAll('.form-group').forEach(g => g.classList.remove('invalid'));
-    document.querySelectorAll('.error-msg').forEach(s => { s.textContent = ''; });
-    const wc = document.getElementById('word-count');
-    if (wc) { wc.textContent = '0 words'; wc.classList.remove('enough'); }
-  }, 0);
-});
-
-/* ── Modal close ─────────────────────────────────────────── */
-
-function closeModal() {
-  document.getElementById('successModal').setAttribute('hidden', '');
-}
-
-// Close modal on overlay click
-document.getElementById('successModal').addEventListener('click', function (e) {
-  if (e.target === this) closeModal();
-});
-
-// Close modal on Escape key
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') closeModal();
+  updateWordCount('');
 });

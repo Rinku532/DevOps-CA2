@@ -3,226 +3,300 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Student Feedback Registration Form — Submit your course feedback securely and easily." />
   <title>Student Feedback Registration Form</title>
+  <meta name="description" content="Student Feedback Registration Form — Submit your course and faculty feedback." />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
-
-  <!-- External CSS -->
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- ========================
-       INTERNAL CSS
-       (base layout & typography)
-       ======================== -->
   <style>
-    /* ---------- Reset & Base ---------- */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
+    :root {
+      --brand-primary:   #6d28d9;
+      --brand-secondary: #4c1d95;
+      --brand-accent:    #a78bfa;
+      --brand-glow:      rgba(109, 40, 217, 0.35);
+      --danger:          #ef4444;
+      --success:         #22c55e;
+      --surface:         rgba(255, 255, 255, 0.05);
     }
 
-    h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.9rem;
-      font-weight: 700;
-      text-align: center;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.35rem;
+    .logo-title span {
+      background: linear-gradient(135deg, #a78bfa, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .subtitle {
-      text-align: center;
-      font-size: 0.88rem;
-      font-weight: 400;
-      margin-bottom: 2rem;
-      opacity: 0.7;
+    .field-group {
+      position: relative;
     }
-
-    label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.45rem;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    select,
-    textarea {
-      width: 100%;
-      font-family: 'Inter', sans-serif;
+    .field-group label {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.4);
       font-size: 0.95rem;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      background: transparent;
+      padding: 0 4px;
+    }
+    .field-group.textarea-wrap label {
+      top: 1rem;
+      transform: none;
+    }
+    .field-group input:focus ~ label,
+    .field-group input:not(:placeholder-shown) ~ label {
+      top: 0;
+      font-size: 0.72rem;
+      color: var(--brand-accent);
+      background: #1a1035;
+      border-radius: 4px;
+    }
+    .field-group select ~ label,
+    .field-group textarea:focus ~ label,
+    .field-group textarea:not(:placeholder-shown) ~ label {
+      top: 0;
+      font-size: 0.72rem;
+      color: var(--brand-accent);
+      background: #1a1035;
+      border-radius: 4px;
     }
 
-    .required-star { color: #f87171; margin-left: 2px; }
+    .btn-submit::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .btn-submit:active::after { opacity: 1; }
+
+    #feedback-wordcount {
+      font-size: 0.74rem;
+      color: rgba(255,255,255,0.35);
+      text-align: right;
+      margin-top: 4px;
+      min-height: 16px;
+      transition: color 0.2s;
+    }
+    #feedback-wordcount.ok  { color: #22c55e; }
+    #feedback-wordcount.bad { color: #f87171; }
+
+    .star-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.35rem;
+    }
+    .star-row i {
+      font-size: 1.5rem;
+      color: rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .star-row i.active,
+    .star-row i:hover {
+      color: #facc15;
+      transform: scale(1.15);
+    }
   </style>
 </head>
+
 <body>
+  <div class="bg-blob blob-1" aria-hidden="true"></div>
+  <div class="bg-blob blob-2" aria-hidden="true"></div>
+  <div class="bg-blob blob-3" aria-hidden="true"></div>
 
-  <!-- ===== MAIN FORM CARD ===== -->
-  <div class="card" role="main">
-    <div class="card-header">
-      <div class="logo-ring">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
-      </div>
-      <h1>Student Feedback Form</h1>
-      <p class="subtitle">Share your experience &amp; help us improve</p>
-    </div>
+  <main class="page-center">
+    <div class="card">
 
-    <form id="feedbackForm" novalidate autocomplete="off">
+      <header class="card-header">
+        <div class="logo">
+          <i class="fa-solid fa-graduation-cap logo-icon" aria-hidden="true"></i>
+        </div>
+        <div class="logo-title">
+          <h1>Student <span>Feedback</span> Portal</h1>
+          <p class="subtitle">Share your experience and help us improve</p>
+        </div>
+        <div class="step-badge"><i class="fa-solid fa-star-half-stroke"></i> Feedback Form</div>
+      </header>
 
-      <!-- ── Row 1: Name + Email ── -->
-      <div class="form-row two-col">
+      <form id="feedbackForm" autocomplete="off" novalidate>
 
-        <!-- Student Name -->
         <div class="form-group" id="group-name">
-          <label for="studentName">Student Name <span class="required-star">*</span></label>
-          <input
-            type="text"
-            id="studentName"
-            name="studentName"
-            placeholder="e.g. Rahul Sharma"
-            aria-required="true"
-            aria-describedby="err-name"
-          />
-          <span class="error-msg" id="err-name" role="alert"></span>
+          <div class="field-group">
+            <input
+              type="text"
+              id="studentName"
+              name="studentName"
+              placeholder=" "
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="name-error"
+            />
+            <label for="studentName">Student Name *</label>
+            <span class="field-icon"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+          </div>
+          <span class="error-msg" id="name-error" role="alert"></span>
         </div>
 
-        <!-- Email ID -->
         <div class="form-group" id="group-email">
-          <label for="emailId">Email ID <span class="required-star">*</span></label>
-          <input
-            type="email"
-            id="emailId"
-            name="emailId"
-            placeholder="e.g. rahul@college.edu"
-            aria-required="true"
-            aria-describedby="err-email"
-          />
-          <span class="error-msg" id="err-email" role="alert"></span>
+          <div class="field-group">
+            <input
+              type="email"
+              id="emailId"
+              name="emailId"
+              placeholder=" "
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="email-error"
+            />
+            <label for="emailId">Email ID *</label>
+            <span class="field-icon"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
+          </div>
+          <span class="error-msg" id="email-error" role="alert"></span>
         </div>
 
-      </div>
-
-      <!-- ── Row 2: Mobile + Department ── -->
-      <div class="form-row two-col">
-
-        <!-- Mobile Number -->
         <div class="form-group" id="group-mobile">
-          <label for="mobileNumber">Mobile Number <span class="required-star">*</span></label>
-          <input
-            type="tel"
-            id="mobileNumber"
-            name="mobileNumber"
-            placeholder="10-digit number"
-            maxlength="10"
-            aria-required="true"
-            aria-describedby="err-mobile"
-          />
-          <span class="error-msg" id="err-mobile" role="alert"></span>
+          <div class="field-group">
+            <input
+              type="tel"
+              id="mobileNumber"
+              name="mobileNumber"
+              placeholder=" "
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="mobile-error"
+            />
+            <label for="mobileNumber">Mobile Number *</label>
+            <span class="field-icon"><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i></span>
+          </div>
+          <span class="error-msg" id="mobile-error" role="alert"></span>
         </div>
 
-        <!-- Department -->
-        <div class="form-group" id="group-dept">
-          <label for="department">Department <span class="required-star">*</span></label>
-          <select id="department" name="department" aria-required="true" aria-describedby="err-dept">
-            <option value="">-- Select Department --</option>
-            <option value="CSE">Computer Science &amp; Engineering</option>
-            <option value="IT">Information Technology</option>
-            <option value="ECE">Electronics &amp; Communication</option>
-            <option value="ME">Mechanical Engineering</option>
-            <option value="CE">Civil Engineering</option>
-            <option value="EE">Electrical Engineering</option>
-            <option value="AIDS">AI &amp; Data Science</option>
-          </select>
-          <span class="error-msg" id="err-dept" role="alert"></span>
+        <div class="form-group" id="group-department">
+          <div class="field-group select-wrap">
+            <select id="department" name="department" aria-required="true" aria-describedby="department-error">
+              <option value="" disabled selected>-- Select Department --</option>
+              <optgroup label="Science & Technology">
+                <option value="CSE">Computer Science &amp; Engineering</option>
+                <option value="IT">Information Technology</option>
+                <option value="ECE">Electronics &amp; Communication</option>
+                <option value="EEE">Electrical &amp; Electronics</option>
+                <option value="MECH">Mechanical Engineering</option>
+                <option value="CIVIL">Civil Engineering</option>
+              </optgroup>
+              <optgroup label="Management">
+                <option value="MBA">Master of Business Administration</option>
+                <option value="BBA">Bachelor of Business Administration</option>
+                <option value="FINANCE">Finance &amp; Accounting</option>
+              </optgroup>
+              <optgroup label="Science">
+                <option value="PHYSICS">Physics</option>
+                <option value="CHEMISTRY">Chemistry</option>
+                <option value="MATH">Mathematics</option>
+                <option value="BIO">Biotechnology</option>
+              </optgroup>
+              <optgroup label="Humanities">
+                <option value="ENGLISH">English Literature</option>
+                <option value="HISTORY">History</option>
+                <option value="PSYCH">Psychology</option>
+                <option value="SOCIO">Sociology</option>
+              </optgroup>
+            </select>
+            <label for="department">Department *</label>
+          </div>
+          <span class="error-msg" id="department-error" role="alert"></span>
         </div>
 
-      </div>
-
-      <!-- ── Gender ── -->
-      <div class="form-group" id="group-gender">
-        <label>Gender <span class="required-star">*</span></label>
-        <div class="radio-group" role="radiogroup" aria-label="Gender selection" aria-describedby="err-gender">
-          <label class="radio-label" for="genderMale">
-            <input type="radio" id="genderMale" name="gender" value="Male" />
-            <span class="radio-custom"></span>
-            Male
-          </label>
-          <label class="radio-label" for="genderFemale">
-            <input type="radio" id="genderFemale" name="gender" value="Female" />
-            <span class="radio-custom"></span>
-            Female
-          </label>
-          <label class="radio-label" for="genderOther">
-            <input type="radio" id="genderOther" name="gender" value="Other" />
-            <span class="radio-custom"></span>
-            Other
-          </label>
+        <div class="form-group" id="group-gender">
+          <p class="field-label"><i class="fa-solid fa-venus-mars" aria-hidden="true"></i>&nbsp; Gender *</p>
+          <div class="gender-options">
+            <label class="checkbox-card" for="male">
+              <input type="radio" id="male" name="gender" value="Male" />
+              <span class="checkmark"></span>
+              <span class="option-icon"><i class="fa-solid fa-mars" aria-hidden="true"></i></span>
+              <span>Male</span>
+            </label>
+            <label class="checkbox-card" for="female">
+              <input type="radio" id="female" name="gender" value="Female" />
+              <span class="checkmark"></span>
+              <span class="option-icon"><i class="fa-solid fa-venus" aria-hidden="true"></i></span>
+              <span>Female</span>
+            </label>
+            <label class="checkbox-card" for="other">
+              <input type="radio" id="other" name="gender" value="Other" />
+              <span class="checkmark"></span>
+              <span class="option-icon"><i class="fa-solid fa-transgender" aria-hidden="true"></i></span>
+              <span>Other</span>
+            </label>
+            <label class="checkbox-card" for="prefer-not">
+              <input type="radio" id="prefer-not" name="gender" value="Prefer not to say" />
+              <span class="checkmark"></span>
+              <span class="option-icon"><i class="fa-solid fa-circle-user" aria-hidden="true"></i></span>
+              <span>Prefer not to say</span>
+            </label>
+          </div>
+          <span class="error-msg" id="gender-error" role="alert"></span>
         </div>
-        <span class="error-msg" id="err-gender" role="alert"></span>
-      </div>
 
-      <!-- ── Feedback Comments ── -->
-      <div class="form-group" id="group-comments">
-        <label for="feedbackComments">Feedback Comments <span class="required-star">*</span></label>
-        <textarea
-          id="feedbackComments"
-          name="feedbackComments"
-          rows="5"
-          placeholder="Please write at least 10 words sharing your experience..."
-          aria-required="true"
-          aria-describedby="err-comments word-count"
-        ></textarea>
-        <div class="textarea-meta">
-          <span class="error-msg" id="err-comments" role="alert"></span>
-          <span class="word-count" id="word-count">0 words</span>
+        <div class="form-group" id="group-rating">
+          <p class="field-label"><i class="fa-solid fa-star" aria-hidden="true"></i>&nbsp; Overall Rating</p>
+          <div class="star-row" id="starRow" role="radiogroup" aria-label="Rating">
+            <i class="fa-solid fa-star" data-val="1" tabindex="0" role="radio" aria-checked="false" aria-label="1 star"></i>
+            <i class="fa-solid fa-star" data-val="2" tabindex="0" role="radio" aria-checked="false" aria-label="2 stars"></i>
+            <i class="fa-solid fa-star" data-val="3" tabindex="0" role="radio" aria-checked="false" aria-label="3 stars"></i>
+            <i class="fa-solid fa-star" data-val="4" tabindex="0" role="radio" aria-checked="false" aria-label="4 stars"></i>
+            <i class="fa-solid fa-star" data-val="5" tabindex="0" role="radio" aria-checked="false" aria-label="5 stars"></i>
+          </div>
+          <input type="hidden" id="rating" name="rating" value="" />
         </div>
-      </div>
 
-      <!-- ── Buttons ── -->
-      <div class="btn-row">
-        <button type="reset" id="resetBtn" class="btn btn-reset">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          Reset
+        <div class="form-group" id="group-feedback">
+          <div class="field-group textarea-wrap">
+            <textarea
+              id="feedbackComments"
+              name="feedbackComments"
+              placeholder=" "
+              rows="5"
+              aria-required="true"
+              aria-describedby="feedback-error"
+            ></textarea>
+            <label for="feedbackComments">Feedback Comments * (min. 10 words)</label>
+          </div>
+          <div id="feedback-wordcount" class="bad">0 / 10 words minimum</div>
+          <span class="error-msg" id="feedback-error" role="alert"></span>
+        </div>
+
+        <div class="btn-row">
+          <button type="reset" class="btn-reset" id="resetBtn">
+            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+            Reset
+          </button>
+          <button type="submit" class="btn-submit" id="submitBtn">
+            <span class="btn-text">Submit Feedback</span>
+            <i class="fa-solid fa-paper-plane btn-arrow" aria-hidden="true"></i>
+          </button>
+        </div>
+
+      </form>
+
+      <div id="successMsg" class="success-msg hidden" role="status">
+        <div class="success-icon"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></div>
+        <h2>Feedback Submitted!</h2>
+        <p>Thank you for sharing your feedback. Your response helps us improve our programmes and services.</p>
+        <button onclick="triggerReset()" class="btn-reset-alt">
+          <i class="fa-solid fa-rotate-left"></i> Submit Another
         </button>
-        <button type="submit" id="submitBtn" class="btn btn-submit">
-          Submit Feedback
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
       </div>
 
-    </form>
-  </div>
-
-  <!-- ===== SUCCESS MODAL ===== -->
-  <div class="modal-overlay" id="successModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
-    <div class="modal-box">
-      <div class="modal-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <h2 id="modal-title">Feedback Submitted!</h2>
-      <p>Thank you for your valuable feedback. We'll use it to improve your learning experience.</p>
-      <button id="modalClose" class="btn btn-submit" onclick="closeModal()">Close</button>
     </div>
-  </div>
+  </main>
 
-  <!-- JavaScript -->
   <script src="validation.js"></script>
 </body>
 </html>
